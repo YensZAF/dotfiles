@@ -18,6 +18,7 @@ fi
 command -v git    &>/dev/null && echo "git already installed. Skipping."    || brew install git
 command -v gh     &>/dev/null && echo "gh already installed. Skipping."     || brew install gh
 command -v ffmpeg &>/dev/null && echo "ffmpeg already installed. Skipping." || brew install ffmpeg
+command -v rclone &>/dev/null && echo "rclone already installed. Skipping." || brew install rclone
 brew list --cask docker &>/dev/null && echo "docker already installed. Skipping." || brew install --cask docker
 brew list --cask utm   &>/dev/null && echo "utm already installed. Skipping."   || brew install --cask utm
 brew list --cask obs           &>/dev/null && echo "obs already installed. Skipping."           || brew install --cask obs
