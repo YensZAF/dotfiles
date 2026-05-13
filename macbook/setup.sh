@@ -14,42 +14,67 @@ else
   echo "Homebrew already installed. Skipping."
 fi
 
-# ── Packages ──────────────────────────────────────────────────────────────────
-command -v git    &>/dev/null && echo "git already installed. Skipping."    || brew install git
-command -v gh     &>/dev/null && echo "gh already installed. Skipping."     || brew install gh
-command -v ffmpeg &>/dev/null && echo "ffmpeg already installed. Skipping." || brew install ffmpeg
-command -v rclone &>/dev/null && echo "rclone already installed. Skipping." || brew install rclone
-brew list --cask docker &>/dev/null && echo "docker already installed. Skipping." || brew install --cask docker
-brew list --cask utm   &>/dev/null && echo "utm already installed. Skipping."   || brew install --cask utm
-brew list --cask obs           &>/dev/null && echo "obs already installed. Skipping."           || brew install --cask obs
-brew list --cask visual-studio-code &>/dev/null && echo "vscode already installed. Skipping." || brew install --cask visual-studio-code
+# ── gum (interactive picker) ──────────────────────────────────────────────────
+command -v gum &>/dev/null || brew install gum
 
-# ── nvm ───────────────────────────────────────────────────────────────────────
-if [[ ! -d "$HOME/.nvm" ]]; then
-  echo "Installing nvm..."
-  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
-  export NVM_DIR="$HOME/.nvm"
-  source "$NVM_DIR/nvm.sh"
-  echo "Installing latest LTS Node..."
-  nvm install --lts
-else
-  echo "nvm already installed. Skipping."
+# ── Package registry ──────────────────────────────────────────────────────────
+typeset -A PKG_TYPE=(
+  [git]=cli             [gh]=cli              [ffmpeg]=cli
+  [rclone]=cli          [tesseract]=cli
+  [docker]=cask         [utm]=cask            [obs]=cask
+  [visual-studio-code]=cask                   [microsoft-office]=cask
+  [localsend]=cask          [obsidian]=cask
+  [nvm]=special         [git-config]=special  [gh-auth]=special
+)
+
+# ── Selection ─────────────────────────────────────────────────────────────────
+selected=("${(@f)$(printf '%s\n' ${(k)PKG_TYPE} | sort | \
+  gum choose --no-limit --header 'Select packages to install (space=toggle, enter=confirm):' || true)}")
+
+if [[ ${#selected[@]} -eq 0 ]]; then
+  echo "Nothing selected. Homebrew is ready; run again to install packages."
+  exit 0
 fi
 
-# ── Git global config ─────────────────────────────────────────────────────────
-if [[ -z "$(git config --global user.name)" ]]; then
-  read "git_name?Git username: "
-  git config --global user.name "$git_name"
-else
-  echo "Git username already set. Skipping."
-fi
+# ── Handlers for special items ────────────────────────────────────────────────
+install_nvm() {
+  if [[ ! -d "$HOME/.nvm" ]]; then
+    echo "Installing nvm..."
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
+    export NVM_DIR="$HOME/.nvm"
+    source "$NVM_DIR/nvm.sh"
+    echo "Installing latest LTS Node..."
+    nvm install --lts
+  else
+    echo "nvm already installed. Skipping."
+  fi
+}
 
-if [[ -z "$(git config --global user.email)" ]]; then
-  read "git_email?Git email: "
-  git config --global user.email "$git_email"
-else
-  echo "Git email already set. Skipping."
-fi
+install_git_config() {
+  if [[ -z "$(git config --global user.name)" ]]; then
+    read "git_name?Git username: "
+    git config --global user.name "$git_name"
+  else
+    echo "Git username already set. Skipping."
+  fi
 
-# ── GitHub CLI auth ───────────────────────────────────────────────────────────
-gh auth status &>/dev/null && echo "gh already authenticated. Skipping." || gh auth login
+  if [[ -z "$(git config --global user.email)" ]]; then
+    read "git_email?Git email: "
+    git config --global user.email "$git_email"
+  else
+    echo "Git email already set. Skipping."
+  fi
+}
+
+install_gh_auth() {
+  gh auth status &>/dev/null && echo "gh already authenticated. Skipping." || gh auth login
+}
+
+# ── Install loop ──────────────────────────────────────────────────────────────
+for item in $selected; do
+  case $PKG_TYPE[$item] in
+    cli)     command -v $item &>/dev/null && echo "$item already installed. Skipping." || brew install $item ;;
+    cask)    brew list --cask $item &>/dev/null && echo "$item already installed. Skipping." || brew install --cask $item ;;
+    special) install_${item//-/_} ;;
+  esac
+done
