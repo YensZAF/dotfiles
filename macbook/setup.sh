@@ -23,8 +23,9 @@ typeset -A PKG_TYPE=(
   [rclone]=cli          [tesseract]=cli
   [docker]=cask         [utm]=cask            [obs]=cask
   [visual-studio-code]=cask                   [microsoft-office]=cask
-  [localsend]=cask          [obsidian]=cask
+  [localsend]=cask          [dbeaver-community]=cask
   [nvm]=special         [git-config]=special  [gh-auth]=special
+  [obsidian]=special
 )
 
 # ── Selection ─────────────────────────────────────────────────────────────────
@@ -68,6 +69,35 @@ install_git_config() {
 
 install_gh_auth() {
   gh auth status &>/dev/null && echo "gh already authenticated. Skipping." || gh auth login
+}
+
+install_obsidian() {
+  if brew list --cask obsidian &>/dev/null; then
+    echo "obsidian already installed. Skipping."
+  else
+    brew install --cask obsidian
+  fi
+
+  gum confirm "Add Obsidian notes repos?" || return
+
+  mkdir -p "$HOME/Notes"
+
+  while true; do
+    repo_url=$(gum input --placeholder "GitHub repo URL")
+    [[ -z "$repo_url" ]] && break
+
+    repo_name="${repo_url##*/}"
+    repo_name="${repo_name%.git}"
+    target="$HOME/Notes/$repo_name"
+
+    if [[ -d "$target" ]]; then
+      echo "$target already exists. Skipping clone."
+    else
+      git clone "$repo_url" "$target"
+    fi
+
+    gum confirm "Add another notes repo?" || break
+  done
 }
 
 # ── Install loop ──────────────────────────────────────────────────────────────
