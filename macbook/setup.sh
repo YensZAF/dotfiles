@@ -20,7 +20,7 @@ command -v gum &>/dev/null || brew install gum
 # ── Package registry ──────────────────────────────────────────────────────────
 typeset -A PKG_TYPE=(
   [git]=cli             [gh]=cli              [ffmpeg]=cli
-  [rclone]=cli          [tesseract]=cli
+  [rclone]=cli          [tesseract]=cli       [go]=cli
   [docker]=cask         [utm]=cask            [obs]=cask
   [visual-studio-code]=cask                   [microsoft-office]=cask
   [localsend]=cask          [dbeaver-community]=cask
@@ -28,9 +28,34 @@ typeset -A PKG_TYPE=(
   [obsidian]=special
 )
 
+typeset -A PKG_DESC=(
+  [git]="version control"          [gh]="GitHub CLI"              [ffmpeg]="media converter"
+  [rclone]="cloud sync CLI"        [tesseract]="OCR engine"        [go]="Go language toolchain"
+  [docker]="container platform"    [utm]="macOS VM manager"        [obs]="screen recorder"
+  [visual-studio-code]="code editor"   [microsoft-office]="MS Office suite"
+  [localsend]="LAN file sharing"   [dbeaver-community]="DB GUI client"
+  [nvm]="Node version manager"     [git-config]="git user config"  [gh-auth]="GitHub auth setup"
+  [obsidian]="markdown notes"
+)
+
 # ── Selection ─────────────────────────────────────────────────────────────────
-selected=("${(@f)$(printf '%s\n' ${(k)PKG_TYPE} | sort | \
-  gum choose --no-limit --header 'Select packages to install (space=toggle, enter=confirm):' || true)}")
+all_items=(${(f)"$(printf '%s\n' ${(k)PKG_TYPE} | sort)"})
+
+display=()
+for item in $all_items; do
+  display+=("$(printf '%-22s  %s' $item "${PKG_DESC[$item]:-}")")
+done
+
+raw=(${(@f)$(printf '%s\n' "${display[@]}" | \
+  gum choose --no-limit \
+    --header "Select packages  (space=toggle  enter=confirm)" \
+  || true)})
+
+selected=()
+for c in "${raw[@]}"; do
+  name="${c%%  *}"
+  [[ -n "${PKG_TYPE[$name]}" ]] && selected+=($name)
+done
 
 if [[ ${#selected[@]} -eq 0 ]]; then
   echo "Nothing selected. Homebrew is ready; run again to install packages."
