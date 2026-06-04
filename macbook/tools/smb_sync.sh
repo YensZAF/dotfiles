@@ -2,14 +2,14 @@
 # smb_sync.sh — Select folder from Finder-mounted mybackups, rsync with auto-resume
 # Requires: share already mounted via Finder at /Volumes/mybackups
 
-SHARE_PATH="/Volumes/mybackups"
+SHARE_PATH="/Volumes/<YOUR_SHARE>"
 RUN_DIR="$(pwd)"
 RETRY_WAIT=30
 
 # Verify share is mounted
 if [ ! -d "$SHARE_PATH" ]; then
   echo "ERROR: $SHARE_PATH not found."
-  echo "Mount the share first: Finder → Go → Connect to Server → smb://192.168.88.32/mybackups"
+  echo "Mount the share first: Finder → Go → Connect to Server → smb://<YOUR_IP>/<YOUR_SHARE>"
   exit 1
 fi
 

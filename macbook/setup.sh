@@ -21,6 +21,7 @@ command -v gum &>/dev/null || brew install gum
 typeset -A PKG_TYPE=(
   [git]=cli             [gh]=cli              [ffmpeg]=cli
   [rclone]=cli          [tesseract]=cli       [go]=cli
+  [fzf]=cli
   [docker]=cask         [utm]=cask            [obs]=cask
   [visual-studio-code]=cask                   [microsoft-office]=cask
   [localsend]=cask          [dbeaver-community]=cask
@@ -31,6 +32,7 @@ typeset -A PKG_TYPE=(
 typeset -A PKG_DESC=(
   [git]="version control"          [gh]="GitHub CLI"              [ffmpeg]="media converter"
   [rclone]="cloud sync CLI"        [tesseract]="OCR engine"        [go]="Go language toolchain"
+  [fzf]="fuzzy finder"
   [docker]="container platform"    [utm]="macOS VM manager"        [obs]="screen recorder"
   [visual-studio-code]="code editor"   [microsoft-office]="MS Office suite"
   [localsend]="LAN file sharing"   [dbeaver-community]="DB GUI client"
