@@ -21,10 +21,11 @@ command -v gum &>/dev/null || brew install gum
 typeset -A PKG_TYPE=(
   [git]=cli             [gh]=cli              [ffmpeg]=cli
   [rclone]=cli          [tesseract]=cli       [go]=cli
-  [fzf]=cli
+  [fzf]=cli             [sevenzip]=cli
   [docker]=cask         [utm]=cask            [obs]=cask
   [visual-studio-code]=cask                   [microsoft-office]=cask
-  [localsend]=cask          [dbeaver-community]=cask
+  [localsend]=cask          [dbeaver-community]=cask  [trezor-suite]=cask
+  [keepassxc]=cask
   [nvm]=special         [git-config]=special  [gh-auth]=special
   [obsidian]=special
 )
@@ -32,10 +33,11 @@ typeset -A PKG_TYPE=(
 typeset -A PKG_DESC=(
   [git]="version control"          [gh]="GitHub CLI"              [ffmpeg]="media converter"
   [rclone]="cloud sync CLI"        [tesseract]="OCR engine"        [go]="Go language toolchain"
-  [fzf]="fuzzy finder"
+  [fzf]="fuzzy finder"             [sevenzip]="7-Zip archive tool"
   [docker]="container platform"    [utm]="macOS VM manager"        [obs]="screen recorder"
   [visual-studio-code]="code editor"   [microsoft-office]="MS Office suite"
-  [localsend]="LAN file sharing"   [dbeaver-community]="DB GUI client"
+  [localsend]="LAN file sharing"   [dbeaver-community]="DB GUI client"  [trezor-suite]="Trezor hardware wallet"
+  [keepassxc]="password manager"
   [nvm]="Node version manager"     [git-config]="git user config"  [gh-auth]="GitHub auth setup"
   [obsidian]="markdown notes"
 )
