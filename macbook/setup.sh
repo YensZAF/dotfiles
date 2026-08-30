@@ -1,6 +1,15 @@
 #!/usr/bin/env zsh
 set -e
 
+# ── Dotfiles symlinks ────────────────────────────────────────────────────────
+DOTFILES_DIR="$(cd "$(dirname "${(%):-%x}")" && pwd)"
+ln -sf "$DOTFILES_DIR/zshrc" "$HOME/.zshrc"
+if [[ ! -f "$HOME/.zshrc_secrets" ]]; then
+  cp "$DOTFILES_DIR/zshrc_secrets.example" "$HOME/.zshrc_secrets"
+  chmod 600 "$HOME/.zshrc_secrets"
+  echo "Created ~/.zshrc_secrets — fill in real API keys there (not tracked in git)."
+fi
+
 # ── Homebrew ──────────────────────────────────────────────────────────────────
 if ! command -v brew &>/dev/null; then
   echo "Installing Homebrew..."
@@ -25,7 +34,7 @@ typeset -A PKG_TYPE=(
   [docker]=cask         [utm]=cask            [obs]=cask
   [visual-studio-code]=cask                   [microsoft-office]=cask
   [localsend]=cask          [dbeaver-community]=cask  [trezor-suite]=cask
-  [keepassxc]=cask
+  [keepassxc]=cask          [balenaetcher]=cask
   [nvm]=special         [git-config]=special  [gh-auth]=special
   [obsidian]=special
 )
@@ -37,7 +46,7 @@ typeset -A PKG_DESC=(
   [docker]="container platform"    [utm]="macOS VM manager"        [obs]="screen recorder"
   [visual-studio-code]="code editor"   [microsoft-office]="MS Office suite"
   [localsend]="LAN file sharing"   [dbeaver-community]="DB GUI client"  [trezor-suite]="Trezor hardware wallet"
-  [keepassxc]="password manager"
+  [keepassxc]="password manager"  [balenaetcher]="USB/SD image flasher"
   [nvm]="Node version manager"     [git-config]="git user config"  [gh-auth]="GitHub auth setup"
   [obsidian]="markdown notes"
 )

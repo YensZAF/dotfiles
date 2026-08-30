@@ -1,0 +1,33 @@
+# ── Claude Code provider switching ──────────────────────────────────────────
+# ANTHROPIC_MODEL env var outranks whatever model is saved in the local
+# transcript, so each alias fully controls provider + model on every launch/resume.
+#
+# API keys live in ~/.zshrc_secrets (gitignored, NOT this file) since this
+# file is a symlink into the dotfiles repo. See macbook/zshrc_secrets.example.
+[ -f "$HOME/.zshrc_secrets" ] && source "$HOME/.zshrc_secrets"
+
+# 1. Native Claude Code (default — Anthropic)
+alias claude='export ANTHROPIC_MODEL="sonnet"; \
+              unset ANTHROPIC_BASE_URL ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN; \
+              npx @anthropic-ai/claude-code'
+
+# 2. OpenRouter
+alias cc-openrouter='export ANTHROPIC_BASE_URL="https://openrouter.ai/api/v1"; \
+              export ANTHROPIC_AUTH_TOKEN="$OPENROUTER_API_KEY"; \
+              export ANTHROPIC_MODEL="anthropic/claude-sonnet-4.5"; \
+              unset ANTHROPIC_API_KEY; \
+              npx @anthropic-ai/claude-code'
+
+# 3. Zhipu GLM (z.ai) API harness — disabled, uncomment to use
+# alias cc-glm='export ANTHROPIC_BASE_URL="https://open.bigmodel.cn/api/paas/v4/anthropic"; \
+#               export ANTHROPIC_AUTH_TOKEN="$GLM_API_KEY"; \
+#               export ANTHROPIC_MODEL="glm-4"; \
+#               unset ANTHROPIC_API_KEY; \
+#               npx @anthropic-ai/claude-code'
+
+# 4. DeepSeek API harness — disabled, uncomment to use
+# alias cc-deepseek='export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"; \
+#               export ANTHROPIC_AUTH_TOKEN="$DEEPSEEK_API_KEY"; \
+#               export ANTHROPIC_MODEL="deepseek-coder"; \
+#               unset ANTHROPIC_API_KEY; \
+#               npx @anthropic-ai/claude-code'
