@@ -6,28 +6,116 @@
 # file is a symlink into the dotfiles repo. See macbook/zshrc_secrets.example.
 [ -f "$HOME/.zshrc_secrets" ] && source "$HOME/.zshrc_secrets"
 
+# Uses brew-installed binary (not npx) — installed via `brew install --cask claude-code`.
+CC_BIN="/opt/homebrew/bin/claude"
+
 # 1. Native Claude Code (default — Anthropic)
 alias claude='export ANTHROPIC_MODEL="sonnet"; \
-              unset ANTHROPIC_BASE_URL ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN; \
-              npx @anthropic-ai/claude-code'
+              unset ANTHROPIC_BASE_URL ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY; \
+              "$CC_BIN"'
 
-# 2. OpenRouter
-alias cc-openrouter='export ANTHROPIC_BASE_URL="https://openrouter.ai/api/v1"; \
-              export ANTHROPIC_AUTH_TOKEN="$OPENROUTER_API_KEY"; \
-              export ANTHROPIC_MODEL="anthropic/claude-sonnet-4.5"; \
-              unset ANTHROPIC_API_KEY; \
-              npx @anthropic-ai/claude-code'
+# 2. OpenRouter — optional arg picks the model, defaults to glm-5.3-flash.
+#    Both pinned preset models route Z.AI → Novita → DeepInfra (sorted by
+#    speed in the preset; edit at https://openrouter.ai/settings/presets,
+#    keep plugins/tools OFF). Syntax: model@preset/slug = model override
+#    + preset routing.
+#    cc-openrouter            → glm-5.3-flash via preset
+#    cc-openrouter base       → glm-5.3 via preset
+#    cc-openrouter glm-5.2    → any z-ai/ model by short name (default routing)
+#    cc-openrouter @preset/glm-preset  → preset's own model order
+cc-openrouter() {
+  local m
+  case "$1" in
+    ""|flash)      m="z-ai/glm-5.3-flash@preset/glm-preset" ;;
+    base|glm-5.3)  m="z-ai/glm-5.3@preset/glm-preset" ;;
+    */*)           m="$1" ;;
+    *)             m="z-ai/$1" ;;
+  esac
+  export ANTHROPIC_API_KEY="";
+  export ANTHROPIC_BASE_URL="https://openrouter.ai/api";
+  export ANTHROPIC_AUTH_TOKEN="$OPENROUTER_API_KEY";
+  export ANTHROPIC_MODEL="$m";
+  export CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1;
+  "$CC_BIN"
+}
 
-# 3. Zhipu GLM (z.ai) API harness — disabled, uncomment to use
+# 3. cc-sanitize — make an OpenRouter/GLM session resumable by native claude.
+#    Anthropic API rejects transcript ids with foreign prefixes (`gen-` message
+#    ids from OpenRouter, `call_` tool ids) — including the ones inside a
+#    /compact summary, which is why compacting on cc-openrouter doesn't rescue
+#    the session for native claude. Rewrites ids deterministically (hash-based,
+#    so tool_use/tool_result pairs stay matched; safe to rerun). Backs up to
+#    <file>.bak first. Run BEFORE `claude --resume`.
+#    Usage: cc-sanitize [path/to/session.jsonl]   (default: newest session for cwd)
+cc-sanitize() {
+  emulate -L zsh
+  local f="$1"
+  if [[ -z "$f" ]]; then
+    local proj="$HOME/.claude/projects/${PWD//\//-}"
+    f=$(command ls -t "$proj"/*.jsonl(N) 2>/dev/null | head -1)
+  fi
+  if [[ -z "$f" || ! -f "$f" ]]; then
+    echo "cc-sanitize: no session file found (pass one: cc-sanitize path.jsonl)" >&2
+    return 1
+  fi
+  [[ -f "$f.bak" ]] || cp "$f" "$f.bak"
+  python3 - "$f" <<'PYEOF'
+import json, sys, hashlib
+
+path = sys.argv[1]
+idmap = {}
+
+def newid(old):
+    if old not in idmap:
+        h = hashlib.md5(old.encode()).hexdigest()[:24]
+        if old.startswith("call_"):
+            idmap[old] = "toolu_" + h
+        else:  # gen-... or any other foreign assistant-message id
+            idmap[old] = "msg_" + h
+    return idmap[old]
+
+def walk(obj):
+    n = 0
+    if isinstance(obj, dict):
+        for k, v in list(obj.items()):
+            if isinstance(v, str) and k in ("id", "tool_use_id") \
+               and not v.startswith(("msg_", "toolu_")):
+                obj[k] = newid(v)
+                n += 1
+            else:
+                n += walk(v)
+    elif isinstance(obj, list):
+        for v in obj:
+            n += walk(v)
+    return n
+
+total = 0
+out = []
+with open(path) as fh:
+    for line in fh:
+        line = line.strip()
+        if not line:
+            continue
+        obj = json.loads(line)
+        total += walk(obj)
+        out.append(json.dumps(obj, ensure_ascii=False))
+
+with open(path, "w") as fh:
+    fh.write("\n".join(out) + "\n")
+print(f"sanitized {path}: {total} foreign id(s) rewritten")
+PYEOF
+}
+
+# 4. Zhipu GLM (z.ai) API harness — disabled, uncomment to use
 # alias cc-glm='export ANTHROPIC_BASE_URL="https://open.bigmodel.cn/api/paas/v4/anthropic"; \
 #               export ANTHROPIC_AUTH_TOKEN="$GLM_API_KEY"; \
 #               export ANTHROPIC_MODEL="glm-4"; \
 #               unset ANTHROPIC_API_KEY; \
-#               npx @anthropic-ai/claude-code'
+#               "$CC_BIN"'
 
-# 4. DeepSeek API harness — disabled, uncomment to use
+# 5. DeepSeek API harness — disabled, uncomment to use
 # alias cc-deepseek='export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"; \
 #               export ANTHROPIC_AUTH_TOKEN="$DEEPSEEK_API_KEY"; \
 #               export ANTHROPIC_MODEL="deepseek-coder"; \
 #               unset ANTHROPIC_API_KEY; \
-#               npx @anthropic-ai/claude-code'
+#               "$CC_BIN"'

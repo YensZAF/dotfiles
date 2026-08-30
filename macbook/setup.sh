@@ -3,6 +3,10 @@ set -e
 
 # ── Dotfiles symlinks ────────────────────────────────────────────────────────
 DOTFILES_DIR="$(cd "$(dirname "${(%):-%x}")" && pwd)"
+if [[ -f "$HOME/.zshrc" && ! -L "$HOME/.zshrc" ]]; then
+  mv "$HOME/.zshrc" "$HOME/.zshrc.bak"
+  echo "Backed up existing ~/.zshrc to ~/.zshrc.bak"
+fi
 ln -sf "$DOTFILES_DIR/zshrc" "$HOME/.zshrc"
 if [[ ! -f "$HOME/.zshrc_secrets" ]]; then
   cp "$DOTFILES_DIR/zshrc_secrets.example" "$HOME/.zshrc_secrets"
