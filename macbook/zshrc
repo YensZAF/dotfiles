@@ -120,3 +120,9 @@ PYEOF
 #               unset ANTHROPIC_API_KEY; \
 #               "$CC_BIN"'
 export PATH="/Applications/Sublime Text.app/Contents/SharedSupport/bin:$PATH"
+
+# ── OpenVPN (see work-notes/cyberlogic/cheatsheets/openvpn-mac.md) ──
+# Never run vpn-lab and vpn-htb at the same time.
+alias vpn-lab='sudo openvpn --cd ~/Documents/vpn/cf-lab --config pfSense-TCP-1194-yens-config.ovpn'
+alias vpn-htb='sudo openvpn --cd ~/Documents/vpn/htb --config machines_eu-5.ovpn'
+alias vpn-routes='netstat -rn -f inet | grep utun'
