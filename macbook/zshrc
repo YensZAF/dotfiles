@@ -119,3 +119,4 @@ PYEOF
 #               export ANTHROPIC_MODEL="deepseek-coder"; \
 #               unset ANTHROPIC_API_KEY; \
 #               "$CC_BIN"'
+export PATH="/Applications/Sublime Text.app/Contents/SharedSupport/bin:$PATH"
