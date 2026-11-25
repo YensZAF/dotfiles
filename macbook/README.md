@@ -26,12 +26,32 @@ curl -fsSL https://raw.githubusercontent.com/YensZAF/dotfiles/main/macbook/setup
 | `microsoft-office` | Cask | MS Office suite |
 | `localsend` | Cask | LAN file sharing |
 | `dbeaver-community` | Cask | DB GUI client |
+| `sublime-text` | Cask | text editor (`subl` CLI) |
 | `nvm` | Special | Node version manager + LTS |
 | `git-config` | Special | git user name/email setup |
 | `gh-auth` | Special | GitHub auth setup |
 | `obsidian` | Special | markdown notes + repo clone |
 
 > Requires macOS with zsh (default since Catalina).
+
+## Sublime Text (`subl`)
+
+Installed via the `sublime-text` cask, which links `subl` into `/opt/homebrew/bin` - already on PATH, no extra setup needed.
+
+```bash
+brew install --cask sublime-text
+which subl          # /opt/homebrew/bin/subl
+subl .              # open the current folder
+subl myfile.txt     # open a file
+```
+
+`subl` on its own just opens Sublime Text (not the current folder).
+
+Only if Sublime was installed manually (dragged into Applications) and `subl` is not found, add this to `zshrc` in this repo:
+
+```bash
+export PATH="/Applications/Sublime Text.app/Contents/SharedSupport/bin:$PATH"
+```
 
 ## Tools
 

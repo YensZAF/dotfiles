@@ -38,7 +38,7 @@ typeset -A PKG_TYPE=(
   [docker]=cask         [utm]=cask            [obs]=cask
   [visual-studio-code]=cask                   [microsoft-office]=cask
   [localsend]=cask          [dbeaver-community]=cask  [trezor-suite]=cask
-  [keepassxc]=cask          [balenaetcher]=cask
+  [keepassxc]=cask          [balenaetcher]=cask       [sublime-text]=cask
   [nvm]=special         [git-config]=special  [gh-auth]=special
   [obsidian]=special
 )
@@ -51,6 +51,7 @@ typeset -A PKG_DESC=(
   [visual-studio-code]="code editor"   [microsoft-office]="MS Office suite"
   [localsend]="LAN file sharing"   [dbeaver-community]="DB GUI client"  [trezor-suite]="Trezor hardware wallet"
   [keepassxc]="password manager"  [balenaetcher]="USB/SD image flasher"
+  [sublime-text]="text editor (subl CLI)"
   [nvm]="Node version manager"     [git-config]="git user config"  [gh-auth]="GitHub auth setup"
   [obsidian]="markdown notes"
 )
